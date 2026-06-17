@@ -275,6 +275,7 @@
 
   .seccion-titulo { font-size: 0.7rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/lib/msal-browser.min.js"></script>
 </head>
 <body>
 
@@ -493,36 +494,10 @@ let filtroActivo = 'todos';
 // ═══════════════════════════════════════════════════════
 // AUTENTICACIÓN (MSAL via CDN)
 // ═══════════════════════════════════════════════════════
-function iniciarLogin() { loginMicrosoft(); } function iniciarLogin_old() {
-  // En producción, usar MSAL.js real
-  // Por ahora simulamos con popup de configuración
-  if (MSAL_CONFIG.clientId === '7a7b5699-a668-4f93-838c-8b5734409c63') {
-    mostrarConfiguracion();
-    return;
-  }
+function iniciarLogin() {
   loginMicrosoft();
 }
 
-function mostrarConfiguracion() {
-  const modal = document.getElementById('modal-detalle');
-  document.getElementById('modal-contenido').innerHTML = `
-    <h3 style="margin-bottom:1rem;color:var(--amarillo)">⚙️ Configuración inicial</h3>
-    <p style="font-size:0.85rem;color:#aaa;line-height:1.6;margin-bottom:1rem">
-      Para conectar con OneDrive necesitas registrar esta app en Azure AD:
-    </p>
-    <ol style="font-size:0.8rem;color:#ccc;line-height:2;padding-left:1.2rem;margin-bottom:1.5rem">
-      <li>Ve a <strong style="color:var(--amarillo)">portal.azure.com</strong></li>
-      <li>App registrations → New registration</li>
-      <li>Nombre: "RAC Cumbres Doradas"</li>
-      <li>Redirect URI: <code style="color:var(--amarillo);font-size:0.75rem">${'https://andersonalfaro94.github.io/RAC-Cumbres-Doradas/'}</code></li>
-      <li>Copiar el Application (client) ID</li>
-      <li>Reemplazar CLIENT_ID en el código</li>
-    </ol>
-    <p style="font-size:0.8rem;color:#888;margin-bottom:1rem">¿No tienes Azure? Prueba en modo demo:</p>
-    <button class="btn-guardar" onclick="loginDemo()">Entrar en modo demo</button>
-  `;
-  modal.classList.add('abierto');
-}
 
 function loginDemo() {
   token = 'DEMO';
@@ -534,20 +509,15 @@ function loginDemo() {
 
 async function loginMicrosoft() {
   try {
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/@azure/msal-browser@3/lib/msal-browser.min.js';
-    script.onload = async () => {
-      const msalApp = new msal.PublicClientApplication(MSAL_CONFIG);
-      await msalApp.initialize();
-      const resp = await msalApp.loginPopup({ scopes: SCOPES });
-      token = resp.accessToken;
-      usuario = resp.account;
-      activarApp();
-      cargarRACsDesdeOneDrive();
-    };
-    document.head.appendChild(script);
+    const msalApp = new msal.PublicClientApplication(MSAL_CONFIG);
+    await msalApp.initialize();
+    const resp = await msalApp.loginPopup({ scopes: SCOPES });
+    token = resp.accessToken;
+    usuario = resp.account;
+    activarApp();
+    cargarRACsDesdeOneDrive();
   } catch (e) {
-    mostrarToast('Error de autenticación: ' + e.message, true);
+    mostrarToast('Error: ' + e.message, true);
   }
 }
 
