@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>RAC - Cumbres Doradas</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --amarillo: #F5A623;
+    --negro: #1a1a1a;
+    --gris-oscuro: #2d2d2d;
+    --gris-medio: #444;
+    --gris-claro: #f5f5f0;
+    --blanco: #ffffff;
+    --rojo: #e74c3c;
+    --verde: #27ae60;
+    --naranja: #e67e22;
+    --azul: #2980b9;
+    --radio: 10px;
+    --radio-grande: 16px;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--negro);
+    color: var(--blanco);
+    min-height: 100vh;
+    max-width: 430px;
+    margin: 0 auto;
+  }
+
+  /* PANTALLA DE LOGIN */
+  #pantalla-login {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+    text-align: center;
+  }
+  .logo-empresa {
+    width: 80px; height: 80px;
+    background: var(--amarillo);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+  }
+  .empresa-nombre { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+  .app-subtitulo { font-size: 0.8rem; color: #aaa; margin-bottom: 3rem; letter-spacing: 0.1em; text-transform: uppercase; }
+  .btn-microsoft {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--blanco); color: var(--negro);
+    border: none; border-radius: var(--radio);
+    padding: 14px 24px; font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; width: 100%; justify-content: center;
+    transition: opacity 0.2s;
+  }
+  .btn-microsoft:hover { opacity: 0.9; }
+  .btn-microsoft svg { width: 20px; height: 20px; }
+  .login-nota { font-size: 0.75rem; color: #666; margin-top: 1.5rem; line-height: 1.5; }
+
+  /* HEADER */
+  #header {
+    background: var(--gris-oscuro);
+    padding: 1rem 1.25rem;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    border-bottom: 1px solid rgba(245,166,35,0.3);
+  }
+  .header-titulo { font-size: 1rem; font-weight: 700; }
+  .header-subtitulo { font-size: 0.7rem; color: var(--amarillo); text-transform: uppercase; letter-spacing: 0.08em; }
+  .btn-icono {
+    background: none; border: none; color: var(--blanco);
+    cursor: pointer; padding: 6px; border-radius: 8px;
+    transition: background 0.2s; display: flex; align-items: center;
+  }
+  .btn-icono:hover { background: rgba(255,255,255,0.1); }
+
+  /* NAVEGACIÓN */
+  #nav-bottom {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 430px;
+    background: var(--gris-oscuro);
+    display: flex; border-top: 1px solid rgba(255,255,255,0.1);
+    z-index: 100;
+  }
+  .nav-btn {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    padding: 10px 0; background: none; border: none; color: #888;
+    cursor: pointer; font-size: 0.65rem; gap: 4px; transition: color 0.2s;
+  }
+  .nav-btn.activo { color: var(--amarillo); }
+  .nav-btn svg { width: 22px; height: 22px; }
+
+  /* CONTENIDO PRINCIPAL */
+  #contenido {
+    padding: 1rem 1rem 5rem;
+  }
+
+  /* SECCIONES */
+  .seccion { display: none; }
+  .seccion.activa { display: block; }
+
+  /* NUEVO RAC - FORMULARIO */
+  .form-grupo { margin-bottom: 1rem; }
+  .form-label {
+    display: block; font-size: 0.75rem; font-weight: 600;
+    color: var(--amarillo); text-transform: uppercase;
+    letter-spacing: 0.06em; margin-bottom: 6px;
+  }
+  .form-input, .form-select, .form-textarea {
+    width: 100%; background: var(--gris-oscuro);
+    border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radio);
+    color: var(--blanco); padding: 12px 14px; font-size: 0.9rem;
+    font-family: inherit; transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    outline: none; border-color: var(--amarillo);
+  }
+  .form-textarea { resize: vertical; min-height: 80px; }
+  .form-select option { background: var(--gris-oscuro); }
+
+  /* SELECTOR TIPO RAC */
+  .tipo-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .tipo-btn {
+    padding: 12px 8px; border-radius: var(--radio);
+    border: 2px solid rgba(255,255,255,0.1);
+    background: var(--gris-oscuro); color: #aaa;
+    cursor: pointer; font-size: 0.8rem; font-weight: 600;
+    text-align: center; transition: all 0.2s;
+  }
+  .tipo-btn.seleccionado.acto { border-color: var(--naranja); color: var(--naranja); background: rgba(230,126,34,0.1); }
+  .tipo-btn.seleccionado.condicion { border-color: var(--azul); color: var(--azul); background: rgba(41,128,185,0.1); }
+
+  /* SELECTOR RIESGO */
+  .riesgo-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .riesgo-btn {
+    padding: 10px 4px; border-radius: var(--radio);
+    border: 2px solid rgba(255,255,255,0.1);
+    background: var(--gris-oscuro); color: #aaa;
+    cursor: pointer; font-size: 0.75rem; font-weight: 700;
+    text-align: center; transition: all 0.2s;
+  }
+  .riesgo-btn.seleccionado.alto { border-color: var(--rojo); color: var(--rojo); background: rgba(231,76,60,0.1); }
+  .riesgo-btn.seleccionado.medio { border-color: var(--naranja); color: var(--naranja); background: rgba(230,126,34,0.1); }
+  .riesgo-btn.seleccionado.bajo { border-color: var(--verde); color: var(--verde); background: rgba(39,174,96,0.1); }
+
+  /* FOTO */
+  .foto-zona {
+    border: 2px dashed rgba(255,255,255,0.2); border-radius: var(--radio-grande);
+    padding: 1.5rem; text-align: center; cursor: pointer;
+    transition: border-color 0.2s; position: relative;
+  }
+  .foto-zona:hover { border-color: var(--amarillo); }
+  .foto-zona input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .foto-preview { width: 100%; border-radius: var(--radio); margin-top: 8px; display: none; max-height: 200px; object-fit: cover; }
+  .foto-icono { font-size: 2rem; margin-bottom: 8px; }
+  .foto-texto { font-size: 0.8rem; color: #888; }
+
+  /* BOTÓN GUARDAR */
+  .btn-guardar {
+    width: 100%; background: var(--amarillo); color: var(--negro);
+    border: none; border-radius: var(--radio-grande);
+    padding: 16px; font-size: 1rem; font-weight: 800;
+    cursor: pointer; margin-top: 1rem; letter-spacing: 0.03em;
+    transition: opacity 0.2s;
+  }
+  .btn-guardar:hover { opacity: 0.9; }
+  .btn-guardar:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* LISTA DE RACs */
+  .filtros { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .filtro-btn {
+    padding: 6px 14px; border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: none; color: #aaa; font-size: 0.75rem;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .filtro-btn.activo { background: var(--amarillo); color: var(--negro); border-color: var(--amarillo); font-weight: 600; }
+
+  .rac-card {
+    background: var(--gris-oscuro);
+    border-radius: var(--radio-grande);
+    padding: 1rem; margin-bottom: 0.75rem;
+    border-left: 4px solid;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  .rac-card:hover { opacity: 0.85; }
+  .rac-card.alto { border-left-color: var(--rojo); }
+  .rac-card.medio { border-left-color: var(--naranja); }
+  .rac-card.bajo { border-left-color: var(--verde); }
+  .rac-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .rac-tipo {
+    font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; padding: 3px 8px; border-radius: 10px;
+  }
+  .rac-tipo.acto { background: rgba(230,126,34,0.2); color: var(--naranja); }
+  .rac-tipo.condicion { background: rgba(41,128,185,0.2); color: var(--azul); }
+  .rac-fecha { font-size: 0.7rem; color: #888; }
+  .rac-descripcion { font-size: 0.85rem; line-height: 1.4; margin-bottom: 8px; }
+  .rac-footer { display: flex; justify-content: space-between; align-items: center; }
+  .rac-lugar { font-size: 0.7rem; color: #888; }
+  .rac-estado {
+    font-size: 0.65rem; font-weight: 700; padding: 3px 10px; border-radius: 10px;
+  }
+  .rac-estado.abierto { background: rgba(231,76,60,0.2); color: var(--rojo); }
+  .rac-estado.cerrado { background: rgba(39,174,96,0.2); color: var(--verde); }
+
+  /* ESTADÍSTICAS */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.5rem; }
+  .stat-card {
+    background: var(--gris-oscuro); border-radius: var(--radio-grande);
+    padding: 1rem; text-align: center;
+  }
+  .stat-numero { font-size: 2rem; font-weight: 800; }
+  .stat-label { font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+  .stat-card.rojo .stat-numero { color: var(--rojo); }
+  .stat-card.naranja .stat-numero { color: var(--naranja); }
+  .stat-card.verde .stat-numero { color: var(--verde); }
+  .stat-card.amarillo .stat-numero { color: var(--amarillo); }
+
+  .grafico-barra { margin-bottom: 1rem; }
+  .barra-label { display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 4px; color: #aaa; }
+  .barra-track { background: rgba(255,255,255,0.1); border-radius: 4px; height: 8px; overflow: hidden; }
+  .barra-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+
+  /* MODAL DETALLE */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.8); z-index: 200;
+    align-items: flex-end;
+  }
+  .modal-overlay.abierto { display: flex; }
+  .modal-sheet {
+    background: var(--gris-oscuro);
+    border-radius: var(--radio-grande) var(--radio-grande) 0 0;
+    padding: 1.5rem; width: 100%; max-width: 430px;
+    margin: 0 auto; max-height: 85vh; overflow-y: auto;
+  }
+  .modal-handle {
+    width: 40px; height: 4px; background: rgba(255,255,255,0.2);
+    border-radius: 2px; margin: 0 auto 1.25rem;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+    background: var(--verde); color: white; padding: 12px 20px;
+    border-radius: 20px; font-size: 0.85rem; font-weight: 600;
+    z-index: 300; display: none; white-space: nowrap;
+  }
+  .toast.error { background: var(--rojo); }
+  .toast.visible { display: block; animation: fadeInOut 2.5s ease; }
+  @keyframes fadeInOut { 0%,100%{opacity:0} 15%,85%{opacity:1} }
+
+  /* CARGANDO */
+  .spinner {
+    width: 24px; height: 24px;
+    border: 3px solid rgba(255,255,255,0.1);
+    border-top-color: var(--amarillo);
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+    margin: 0 auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty-state { text-align: center; padding: 3rem 1rem; color: #666; }
+  .empty-state svg { opacity: 0.3; margin-bottom: 1rem; }
+
+  .seccion-titulo { font-size: 0.7rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; }
+</style>
+</head>
+<body>
+
+<!-- PANTALLA LOGIN -->
+<div id="pantalla-login">
+  <div class="logo-empresa">⛏️</div>
+  <div class="empresa-nombre">CUMBRES DORADAS S.A.C.</div>
+  <div class="app-subtitulo">Sistema de Seguridad · RAC</div>
+
+  <button class="btn-microsoft" onclick="iniciarLogin()">
+    <svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+      <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
+      <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
+      <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>
+      <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
+    </svg>
+    Ingresar con Microsoft
+  </button>
+  <p class="login-nota">Usa tu cuenta corporativa<br>de Cumbres Doradas</p>
+</div>
+
+<!-- APP PRINCIPAL -->
+<div id="app" style="display:none">
+  <div id="header">
+    <div>
+      <div class="header-titulo">RAC · Cumbres Doradas</div>
+      <div class="header-subtitulo" id="header-usuario">Cargando...</div>
+    </div>
+    <button class="btn-icono" onclick="cerrarSesion()" title="Cerrar sesión">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    </button>
+  </div>
+
+  <div id="contenido">
+
+    <!-- SECCIÓN: NUEVO RAC -->
+    <div class="seccion activa" id="sec-nuevo">
+      <p class="seccion-titulo">Nuevo registro</p>
+
+      <div class="form-grupo">
+        <label class="form-label">Tipo de hallazgo</label>
+        <div class="tipo-selector">
+          <button class="tipo-btn" id="btn-acto" onclick="seleccionarTipo('acto')">⚠️ Acto Subestándar</button>
+          <button class="tipo-btn" id="btn-condicion" onclick="seleccionarTipo('condicion')">🔧 Condición Subestándar</button>
+        </div>
+      </div>
+
+      <div class="form-grupo">
+        <label class="form-label">Nivel de riesgo</label>
+        <div class="riesgo-selector">
+          <button class="riesgo-btn" id="btn-alto" onclick="seleccionarRiesgo('alto')">ALTO</button>
+          <button class="riesgo-btn" id="btn-medio" onclick="seleccionarRiesgo('medio')">MEDIO</button>
+          <button class="riesgo-btn" id="btn-bajo" onclick="seleccionarRiesgo('bajo')">BAJO</button>
+        </div>
+      </div>
+
+      <div class="form-grupo">
+        <label class="form-label">Lugar / Área</label>
+        <input class="form-input" id="campo-lugar" type="text" placeholder="Ej: Galería 4, Nivel 2800" autocomplete="off">
+      </div>
+
+      <div class="form-grupo">
+        <label class="form-label">Descripción del hallazgo</label>
+        <textarea class="form-textarea" id="campo-descripcion" placeholder="Describe el acto o condición observada..."></textarea>
+      </div>
+
+      <div class="form-grupo">
+        <label class="form-label">Responsable del cierre</label>
+        <input class="form-input" id="campo-responsable" type="text" placeholder="Nombre del responsable">
+      </div>
+
+      <div class="form-grupo">
+        <label class="form-label">Fecha límite de cierre</label>
+        <input class="form-input" id="campo-fecha-cierre" type="date">
+      </div>
+
+      <div class="form-grupo">
+        <label class="form-label">Foto del hallazgo</label>
+        <div class="foto-zona" onclick="document.getElementById('campo-foto').click()">
+          <input type="file" id="campo-foto" accept="image/*" capture="environment" onchange="previewFoto(event)" style="display:none">
+          <div class="foto-icono">📷</div>
+          <div class="foto-texto">Toca para tomar foto o seleccionar</div>
+          <img class="foto-preview" id="foto-preview" alt="Preview">
+        </div>
+      </div>
+
+      <button class="btn-guardar" id="btn-guardar" onclick="guardarRAC()">
+        Guardar RAC
+      </button>
+    </div>
+
+    <!-- SECCIÓN: LISTA -->
+    <div class="seccion" id="sec-lista">
+      <p class="seccion-titulo">Registros</p>
+      <div class="filtros">
+        <button class="filtro-btn activo" onclick="filtrar('todos', this)">Todos</button>
+        <button class="filtro-btn" onclick="filtrar('abierto', this)">Abiertos</button>
+        <button class="filtro-btn" onclick="filtrar('cerrado', this)">Cerrados</button>
+        <button class="filtro-btn" onclick="filtrar('alto', this)">Alto riesgo</button>
+      </div>
+      <div id="lista-racs"></div>
+    </div>
+
+    <!-- SECCIÓN: ESTADÍSTICAS -->
+    <div class="seccion" id="sec-stats">
+      <p class="seccion-titulo">Resumen del mes</p>
+      <div class="stats-grid">
+        <div class="stat-card amarillo">
+          <div class="stat-numero" id="stat-total">0</div>
+          <div class="stat-label">Total RACs</div>
+        </div>
+        <div class="stat-card rojo">
+          <div class="stat-numero" id="stat-abiertos">0</div>
+          <div class="stat-label">Abiertos</div>
+        </div>
+        <div class="stat-card verde">
+          <div class="stat-numero" id="stat-cerrados">0</div>
+          <div class="stat-label">Cerrados</div>
+        </div>
+        <div class="stat-card naranja">
+          <div class="stat-numero" id="stat-alto">0</div>
+          <div class="stat-label">Alto riesgo</div>
+        </div>
+      </div>
+      <p class="seccion-titulo">Por tipo</p>
+      <div class="grafico-barra">
+        <div class="barra-label"><span>Actos subestándar</span><span id="pct-acto">0%</span></div>
+        <div class="barra-track"><div class="barra-fill" id="bar-acto" style="width:0%;background:var(--naranja)"></div></div>
+      </div>
+      <div class="grafico-barra">
+        <div class="barra-label"><span>Condiciones subestándar</span><span id="pct-condicion">0%</span></div>
+        <div class="barra-track"><div class="barra-fill" id="bar-condicion" style="width:0%;background:var(--azul)"></div></div>
+      </div>
+      <p class="seccion-titulo" style="margin-top:1.5rem">Por nivel de riesgo</p>
+      <div class="grafico-barra">
+        <div class="barra-label"><span>Alto</span><span id="pct-alto">0%</span></div>
+        <div class="barra-track"><div class="barra-fill" id="bar-alto" style="width:0%;background:var(--rojo)"></div></div>
+      </div>
+      <div class="grafico-barra">
+        <div class="barra-label"><span>Medio</span><span id="pct-medio">0%</span></div>
+        <div class="barra-track"><div class="barra-fill" id="bar-medio" style="width:0%;background:var(--naranja)"></div></div>
+      </div>
+      <div class="grafico-barra">
+        <div class="barra-label"><span>Bajo</span><span id="pct-bajo">0%</span></div>
+        <div class="barra-track"><div class="barra-fill" id="bar-bajo" style="width:0%;background:var(--verde)"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVEGACIÓN INFERIOR -->
+  <nav id="nav-bottom">
+    <button class="nav-btn activo" id="nav-nuevo" onclick="cambiarSeccion('nuevo')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+      </svg>
+      Nuevo
+    </button>
+    <button class="nav-btn" id="nav-lista" onclick="cambiarSeccion('lista')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      Registros
+    </button>
+    <button class="nav-btn" id="nav-stats" onclick="cambiarSeccion('stats')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
+        <line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/>
+      </svg>
+      Estadísticas
+    </button>
+  </nav>
+</div>
+
+<!-- MODAL DETALLE RAC -->
+<div class="modal-overlay" id="modal-detalle" onclick="cerrarModal(event)">
+  <div class="modal-sheet" id="modal-sheet">
+    <div class="modal-handle"></div>
+    <div id="modal-contenido"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONFIGURACIÓN MSAL - Microsoft Authentication
+// ═══════════════════════════════════════════════════════
+// INSTRUCCIÓN: Reemplaza CLIENT_ID con tu Application (client) ID de Azure AD
+// Pasos: portal.azure.com > App registrations > New registration
+// Redirect URI: la URL donde despliegues esta app (ej: https://tudominio.com)
+const MSAL_CONFIG = {
+  clientId: 'TU_CLIENT_ID_AQUI',
+  authority: 'https://login.microsoftonline.com/common',
+  redirectUri: window.location.origin + window.location.pathname
+};
+
+const SCOPES = ['Files.ReadWrite', 'User.Read'];
+const ARCHIVO_EXCEL = 'RAC_CumbresDoradas.xlsx';
+const CARPETA_FOTOS = 'RAC_Fotos';
+
+// ═══════════════════════════════════════════════════════
+// ESTADO DE LA APP
+// ═══════════════════════════════════════════════════════
+let token = null;
+let usuario = null;
+let racs = [];
+let tipoSeleccionado = null;
+let riesgoSeleccionado = null;
+let fotoBase64 = null;
+let filtroActivo = 'todos';
+
+// ═══════════════════════════════════════════════════════
+// AUTENTICACIÓN (MSAL via CDN)
+// ═══════════════════════════════════════════════════════
+function iniciarLogin() {
+  // En producción, usar MSAL.js real
+  // Por ahora simulamos con popup de configuración
+  if (MSAL_CONFIG.clientId === 'TU_CLIENT_ID_AQUI') {
+    mostrarConfiguracion();
+    return;
+  }
+  loginMicrosoft();
+}
+
+function mostrarConfiguracion() {
+  const modal = document.getElementById('modal-detalle');
+  document.getElementById('modal-contenido').innerHTML = `
+    <h3 style="margin-bottom:1rem;color:var(--amarillo)">⚙️ Configuración inicial</h3>
+    <p style="font-size:0.85rem;color:#aaa;line-height:1.6;margin-bottom:1rem">
+      Para conectar con OneDrive necesitas registrar esta app en Azure AD:
+    </p>
+    <ol style="font-size:0.8rem;color:#ccc;line-height:2;padding-left:1.2rem;margin-bottom:1.5rem">
+      <li>Ve a <strong style="color:var(--amarillo)">portal.azure.com</strong></li>
+      <li>App registrations → New registration</li>
+      <li>Nombre: "RAC Cumbres Doradas"</li>
+      <li>Redirect URI: <code style="color:var(--amarillo);font-size:0.75rem">${window.location.origin + window.location.pathname}</code></li>
+      <li>Copiar el Application (client) ID</li>
+      <li>Reemplazar CLIENT_ID en el código</li>
+    </ol>
+    <p style="font-size:0.8rem;color:#888;margin-bottom:1rem">¿No tienes Azure? Prueba en modo demo:</p>
+    <button class="btn-guardar" onclick="loginDemo()">Entrar en modo demo</button>
+  `;
+  modal.classList.add('abierto');
+}
+
+function loginDemo() {
+  token = 'DEMO';
+  usuario = { displayName: 'Demo Usuario', mail: 'demo@cumbres.com' };
+  racs = datosDemo();
+  activarApp();
+  cerrarModal({ target: document.getElementById('modal-detalle') });
+}
+
+async function loginMicrosoft() {
+  try {
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/@azure/msal-browser@3/lib/msal-browser.min.js';
+    script.onload = async () => {
+      const msalApp = new msal.PublicClientApplication(MSAL_CONFIG);
+      await msalApp.initialize();
+      const resp = await msalApp.loginPopup({ scopes: SCOPES });
+      token = resp.accessToken;
+      usuario = resp.account;
+      activarApp();
+      cargarRACsDesdeOneDrive();
+    };
+    document.head.appendChild(script);
+  } catch (e) {
+    mostrarToast('Error de autenticación: ' + e.message, true);
+  }
+}
+
+function activarApp() {
+  document.getElementById('pantalla-login').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('header-usuario').textContent = usuario.displayName || usuario.mail;
+  renderizarLista();
+  actualizarEstadisticas();
+}
+
+function cerrarSesion() {
+  token = null; usuario = null; racs = [];
+  document.getElementById('pantalla-login').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════
+// MICROSOFT GRAPH API - OneDrive
+// ═══════════════════════════════════════════════════════
+async function cargarRACsDesdeOneDrive() {
+  if (token === 'DEMO') return;
+  try {
+    const resp = await fetch(
+      `https://graph.microsoft.com/v1.0/me/drive/root:/${ARCHIVO_EXCEL}:/workbook/worksheets('RAC')/usedRange`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!resp.ok) return;
+    const data = await resp.json();
+    const filas = data.values.slice(1);
+    racs = filas.filter(f => f[0]).map((f, i) => ({
+      id: f[0] || i,
+      fecha: f[1], hora: f[2], tipo: f[3], riesgo: f[4],
+      lugar: f[5], descripcion: f[6], responsable: f[7],
+      fechaCierre: f[8], estado: f[9] || 'abierto',
+      observador: f[10], fotoUrl: f[11]
+    }));
+    renderizarLista();
+    actualizarEstadisticas();
+  } catch (e) { console.warn('No se pudo cargar desde OneDrive:', e); }
+}
+
+async function guardarEnOneDrive(rac) {
+  if (token === 'DEMO') {
+    racs.unshift(rac);
+    return true;
+  }
+  try {
+    const fila = [[
+      rac.id, rac.fecha, rac.hora, rac.tipo, rac.riesgo,
+      rac.lugar, rac.descripcion, rac.responsable,
+      rac.fechaCierre, rac.estado, rac.observador, rac.fotoUrl || ''
+    ]];
+    const resp = await fetch(
+      `https://graph.microsoft.com/v1.0/me/drive/root:/${ARCHIVO_EXCEL}:/workbook/worksheets('RAC')/tables('TablaRAC')/rows`,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ values: fila })
+      }
+    );
+    if (!resp.ok) throw new Error('Error al guardar en Excel');
+    if (fotoBase64) await guardarFotoOneDrive(rac.id);
+    racs.unshift(rac);
+    return true;
+  } catch (e) {
+    mostrarToast('Error: ' + e.message, true);
+    return false;
+  }
+}
+
+async function guardarFotoOneDrive(racId) {
+  if (!fotoBase64 || token === 'DEMO') return;
+  try {
+    const blob = await fetch(fotoBase64).then(r => r.blob());
+    await fetch(
+      `https://graph.microsoft.com/v1.0/me/drive/root:/${CARPETA_FOTOS}/RAC_${racId}.jpg:/content`,
+      { method: 'PUT', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'image/jpeg' }, body: blob }
+    );
+  } catch (e) { console.warn('No se pudo guardar foto:', e); }
+}
+
+// ═══════════════════════════════════════════════════════
+// FORMULARIO
+// ═══════════════════════════════════════════════════════
+function seleccionarTipo(tipo) {
+  tipoSeleccionado = tipo;
+  document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('seleccionado', 'acto', 'condicion'));
+  document.getElementById('btn-' + tipo).classList.add('seleccionado', tipo);
+}
+
+function seleccionarRiesgo(nivel) {
+  riesgoSeleccionado = nivel;
+  document.querySelectorAll('.riesgo-btn').forEach(b => b.classList.remove('seleccionado', 'alto', 'medio', 'bajo'));
+  document.getElementById('btn-' + nivel).classList.add('seleccionado', nivel);
+}
+
+function previewFoto(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    fotoBase64 = ev.target.result;
+    const img = document.getElementById('foto-preview');
+    img.src = fotoBase64;
+    img.style.display = 'block';
+    document.querySelector('.foto-texto').textContent = '📷 ' + file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function guardarRAC() {
+  const lugar = document.getElementById('campo-lugar').value.trim();
+  const descripcion = document.getElementById('campo-descripcion').value.trim();
+  const responsable = document.getElementById('campo-responsable').value.trim();
+
+  if (!tipoSeleccionado) { mostrarToast('Selecciona el tipo de hallazgo', true); return; }
+  if (!riesgoSeleccionado) { mostrarToast('Selecciona el nivel de riesgo', true); return; }
+  if (!lugar) { mostrarToast('Ingresa el lugar del hallazgo', true); return; }
+  if (!descripcion) { mostrarToast('Ingresa la descripción del hallazgo', true); return; }
+
+  const btn = document.getElementById('btn-guardar');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div>';
+
+  const ahora = new Date();
+  const rac = {
+    id: 'RAC-' + Date.now(),
+    fecha: ahora.toLocaleDateString('es-PE'),
+    hora: ahora.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
+    tipo: tipoSeleccionado,
+    riesgo: riesgoSeleccionado,
+    lugar, descripcion,
+    responsable: responsable || 'Sin asignar',
+    fechaCierre: document.getElementById('campo-fecha-cierre').value,
+    estado: 'abierto',
+    observador: usuario.displayName || usuario.mail,
+    fotoUrl: fotoBase64 ? `${CARPETA_FOTOS}/RAC_${Date.now()}.jpg` : ''
+  };
+
+  const ok = await guardarEnOneDrive(rac);
+
+  btn.disabled = false;
+  btn.textContent = 'Guardar RAC';
+
+  if (ok) {
+    mostrarToast('✅ RAC guardado en OneDrive');
+    limpiarFormulario();
+    renderizarLista();
+    actualizarEstadisticas();
+  }
+}
+
+function limpiarFormulario() {
+  tipoSeleccionado = null; riesgoSeleccionado = null; fotoBase64 = null;
+  document.querySelectorAll('.tipo-btn, .riesgo-btn').forEach(b =>
+    b.classList.remove('seleccionado', 'acto', 'condicion', 'alto', 'medio', 'bajo')
+  );
+  ['campo-lugar', 'campo-descripcion', 'campo-responsable', 'campo-fecha-cierre'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('foto-preview').style.display = 'none';
+  document.querySelector('.foto-texto').textContent = 'Toca para tomar foto o seleccionar';
+}
+
+// ═══════════════════════════════════════════════════════
+// LISTA Y FILTROS
+// ═══════════════════════════════════════════════════════
+function filtrar(tipo, btn) {
+  filtroActivo = tipo;
+  document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('activo'));
+  btn.classList.add('activo');
+  renderizarLista();
+}
+
+function renderizarLista() {
+  const contenedor = document.getElementById('lista-racs');
+  let lista = [...racs];
+  if (filtroActivo === 'abierto') lista = lista.filter(r => r.estado === 'abierto');
+  else if (filtroActivo === 'cerrado') lista = lista.filter(r => r.estado === 'cerrado');
+  else if (filtroActivo === 'alto') lista = lista.filter(r => r.riesgo === 'alto');
+
+  if (lista.length === 0) {
+    contenedor.innerHTML = `
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#888" stroke-width="1.5">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="9" y1="15" x2="15" y2="15"/>
+        </svg>
+        <p>Sin registros</p>
+      </div>`;
+    return;
+  }
+
+  contenedor.innerHTML = lista.map(r => `
+    <div class="rac-card ${r.riesgo}" onclick="verDetalle('${r.id}')">
+      <div class="rac-header">
+        <span class="rac-tipo ${r.tipo}">${r.tipo === 'acto' ? 'Acto' : 'Condición'}</span>
+        <span class="rac-fecha">${r.fecha} ${r.hora}</span>
+      </div>
+      <p class="rac-descripcion">${r.descripcion}</p>
+      <div class="rac-footer">
+        <span class="rac-lugar">📍 ${r.lugar}</span>
+        <span class="rac-estado ${r.estado}">${r.estado === 'abierto' ? 'Abierto' : 'Cerrado'}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function verDetalle(id) {
+  const r = racs.find(x => x.id === id);
+  if (!r) return;
+  const colores = { alto: '#e74c3c', medio: '#e67e22', bajo: '#27ae60' };
+  document.getElementById('modal-contenido').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <span style="font-size:0.75rem;color:#888">${r.id}</span>
+      <span class="rac-estado ${r.estado}" style="padding:4px 12px;border-radius:12px">
+        ${r.estado === 'abierto' ? 'Abierto' : 'Cerrado'}
+      </span>
+    </div>
+    <div style="padding:12px;border-radius:10px;background:rgba(255,255,255,0.05);margin-bottom:1rem">
+      <div style="display:flex;gap:10px;align-items:center">
+        <span style="font-size:1.5rem">${r.tipo === 'acto' ? '⚠️' : '🔧'}</span>
+        <div>
+          <p style="font-weight:700;font-size:0.9rem">${r.tipo === 'acto' ? 'Acto Subestándar' : 'Condición Subestándar'}</p>
+          <p style="font-size:0.75rem;color:${colores[r.riesgo]};font-weight:700">Riesgo ${r.riesgo.toUpperCase()}</p>
+        </div>
+      </div>
+    </div>
+    <table style="width:100%;font-size:0.82rem;border-collapse:collapse">
+      ${fila('📅 Fecha', r.fecha + ' ' + r.hora)}
+      ${fila('📍 Lugar', r.lugar)}
+      ${fila('📝 Descripción', r.descripcion)}
+      ${fila('👤 Observador', r.observador)}
+      ${fila('🔧 Responsable', r.responsable)}
+      ${r.fechaCierre ? fila('⏰ Fecha cierre', r.fechaCierre) : ''}
+    </table>
+    ${r.fotoUrl ? `<img src="${r.fotoUrl}" style="width:100%;border-radius:10px;margin-top:1rem;max-height:180px;object-fit:cover" onerror="this.style.display='none'">` : ''}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:1rem">
+      ${r.estado === 'abierto'
+        ? `<button class="btn-guardar" style="grid-column:1/-1" onclick="cambiarEstado('${r.id}','cerrado')">✅ Marcar como cerrado</button>`
+        : `<button class="btn-guardar" onclick="cambiarEstado('${r.id}','abierto')">🔓 Reabrir</button><button class="btn-guardar" style="background:var(--gris-medio);color:#ccc" onclick="cerrarModal({target:document.getElementById('modal-detalle')})">Cerrar</button>`
+      }
+    </div>
+  `;
+  document.getElementById('modal-detalle').classList.add('abierto');
+}
+
+function fila(label, valor) {
+  return `<tr>
+    <td style="color:#888;padding:6px 0;white-space:nowrap;vertical-align:top;padding-right:12px">${label}</td>
+    <td style="color:#eee;padding:6px 0">${valor}</td>
+  </tr>`;
+}
+
+function cambiarEstado(id, estado) {
+  const rac = racs.find(r => r.id === id);
+  if (rac) { rac.estado = estado; }
+  document.getElementById('modal-detalle').classList.remove('abierto');
+  renderizarLista();
+  actualizarEstadisticas();
+  mostrarToast(estado === 'cerrado' ? '✅ RAC cerrado' : '🔓 RAC reabierto');
+  // En producción: actualizar el Excel en OneDrive vía Graph API
+}
+
+// ═══════════════════════════════════════════════════════
+// ESTADÍSTICAS
+// ═══════════════════════════════════════════════════════
+function actualizarEstadisticas() {
+  const total = racs.length;
+  const abiertos = racs.filter(r => r.estado === 'abierto').length;
+  const cerrados = racs.filter(r => r.estado === 'cerrado').length;
+  const alto = racs.filter(r => r.riesgo === 'alto').length;
+  const actos = racs.filter(r => r.tipo === 'acto').length;
+  const condiciones = racs.filter(r => r.tipo === 'condicion').length;
+  const medio = racs.filter(r => r.riesgo === 'medio').length;
+  const bajo = racs.filter(r => r.riesgo === 'bajo').length;
+
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-abiertos').textContent = abiertos;
+  document.getElementById('stat-cerrados').textContent = cerrados;
+  document.getElementById('stat-alto').textContent = alto;
+
+  const pct = (n) => total > 0 ? Math.round(n / total * 100) : 0;
+  ['acto','condicion','alto','medio','bajo'].forEach(k => {
+    const val = k === 'acto' ? actos : k === 'condicion' ? condiciones :
+                k === 'alto' ? alto : k === 'medio' ? medio : bajo;
+    const p = pct(val);
+    document.getElementById('pct-' + k).textContent = p + '%';
+    document.getElementById('bar-' + k).style.width = p + '%';
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// NAVEGACIÓN
+// ═══════════════════════════════════════════════════════
+function cambiarSeccion(nombre) {
+  document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activa'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('activo'));
+  document.getElementById('sec-' + nombre).classList.add('activa');
+  document.getElementById('nav-' + nombre).classList.add('activo');
+  if (nombre === 'lista') renderizarLista();
+  if (nombre === 'stats') actualizarEstadisticas();
+}
+
+function cerrarModal(e) {
+  if (e.target === document.getElementById('modal-detalle')) {
+    document.getElementById('modal-detalle').classList.remove('abierto');
+  }
+}
+
+function mostrarToast(msg, error = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (error ? ' error' : '') + ' visible';
+  setTimeout(() => t.className = 'toast', 2600);
+}
+
+// ═══════════════════════════════════════════════════════
+// DATOS DEMO
+// ═══════════════════════════════════════════════════════
+function datosDemo() {
+  return [
+    { id:'RAC-001', fecha:'17/06/2025', hora:'08:30', tipo:'acto', riesgo:'alto', lugar:'Galería 4 - Nivel 2800', descripcion:'Trabajador sin protección auditiva durante perforación', responsable:'Ing. Torres', fechaCierre:'20/06/2025', estado:'abierto', observador:'Demo Usuario', fotoUrl:'' },
+    { id:'RAC-002', fecha:'16/06/2025', hora:'14:15', tipo:'condicion', riesgo:'medio', lugar:'Rampa principal', descripcion:'Iluminación deficiente en tramo de 50 metros', responsable:'Mant. General', fechaCierre:'18/06/2025', estado:'cerrado', observador:'Demo Usuario', fotoUrl:'' },
+    { id:'RAC-003', fecha:'15/06/2025', hora:'10:00', tipo:'acto', riesgo:'bajo', lugar:'Pique N°2', descripcion:'Guantes de EPP deteriorados en operador de perforadora', responsable:'Sup. Guardia A', fechaCierre:'16/06/2025', estado:'cerrado', observador:'Demo Usuario', fotoUrl:'' },
+    { id:'RAC-004', fecha:'15/06/2025', hora:'07:45', tipo:'condicion', riesgo:'alto', lugar:'Acceso Tajo', descripcion:'Berma de seguridad incompleta en curva de volteo', responsable:'Ing. Vial', fechaCierre:'17/06/2025', estado:'abierto', observador:'Demo Usuario', fotoUrl:'' },
+  ];
+}
+
+// PWA Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
