@@ -879,7 +879,7 @@ function datosDemo() {
 }
 
 // Procesar token OAuth al cargar
-if (!procesarTokenDeURL()) { /* login pendiente */ }
+document.addEventListener("DOMContentLoaded", () => { procesarTokenDeURL(); });
 
 // PWA Service Worker
 if ('serviceWorker' in navigator) {
