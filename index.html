@@ -275,7 +275,6 @@
 
   .seccion-titulo { font-size: 0.7rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/lib/msal-browser.min.js"></script>
 </head>
 <body>
 
@@ -507,17 +506,47 @@ function loginDemo() {
   cerrarModal({ target: document.getElementById('modal-detalle') });
 }
 
-async function loginMicrosoft() {
-  try {
-    const msalApp = new msal.PublicClientApplication(MSAL_CONFIG);
-    await msalApp.initialize();
-    const resp = await msalApp.loginPopup({ scopes: SCOPES });
-    token = resp.accessToken;
-    usuario = resp.account;
+function loginMicrosoft() {
+  const CLIENT_ID = '7a7b5699-a668-4f93-838c-8b5734409c63';
+  const REDIRECT = 'https://andersonalfaro94.github.io/RAC-Cumbres-Doradas/';
+  const SCOPE = 'Files.ReadWrite User.Read openid profile';
+  const state = Math.random().toString(36).slice(2);
+  sessionStorage.setItem('oauth_state', state);
+
+  const url = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize' +
+    '?client_id=' + CLIENT_ID +
+    '&response_type=token' +
+    '&redirect_uri=' + encodeURIComponent(REDIRECT) +
+    '&scope=' + encodeURIComponent(SCOPE) +
+    '&state=' + state +
+    '&nonce=' + Math.random().toString(36).slice(2) +
+    '&response_mode=fragment';
+
+  window.location.href = url;
+}
+
+function procesarTokenDeURL() {
+  const hash = window.location.hash.substring(1);
+  if (!hash.includes('access_token')) return false;
+  const params = new URLSearchParams(hash);
+  token = params.get('access_token');
+  if (!token) return false;
+  window.history.replaceState({}, document.title, window.location.pathname);
+  obtenerUsuario().then(() => {
     activarApp();
     cargarRACsDesdeOneDrive();
-  } catch (e) {
-    mostrarToast('Error: ' + e.message, true);
+  });
+  return true;
+}
+
+async function obtenerUsuario() {
+  try {
+    const resp = await fetch('https://graph.microsoft.com/v1.0/me', {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    usuario = await resp.json();
+  } catch(e) {
+    usuario = { displayName: 'Usuario', mail: '' };
   }
 }
 
@@ -848,6 +877,9 @@ function datosDemo() {
     { id:'RAC-004', fecha:'15/06/2025', hora:'07:45', tipo:'condicion', riesgo:'alto', lugar:'Acceso Tajo', descripcion:'Berma de seguridad incompleta en curva de volteo', responsable:'Ing. Vial', fechaCierre:'17/06/2025', estado:'abierto', observador:'Demo Usuario', fotoUrl:'' },
   ];
 }
+
+// Procesar token OAuth al cargar
+if (!procesarTokenDeURL()) { /* login pendiente */ }
 
 // PWA Service Worker
 if ('serviceWorker' in navigator) {
