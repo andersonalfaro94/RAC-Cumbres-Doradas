@@ -477,6 +477,8 @@ const MSAL_CONFIG = {
 
 const SCOPES = ['Files.ReadWrite', 'User.Read'];
 const ARCHIVO_EXCEL = 'Proyecto Cumbres Doradas/5. SIG SSOMA/RAC_CumbresDoradas.xlsx';
+const DRIVE_ID = '6AFF701E92BD31D4';
+const ITEM_ID = 'DE55A54F-46FA-49A9-AF76-FE46648006D8';
 const CARPETA_FOTOS = 'RAC_Fotos';
 
 // ═══════════════════════════════════════════════════════
@@ -571,7 +573,7 @@ async function cargarRACsDesdeOneDrive() {
   if (token === 'DEMO') return;
   try {
     const resp = await fetch(
-      `https://graph.microsoft.com/v1.0/me/drive/root:/${ARCHIVO_EXCEL}:/workbook/worksheets('RAC')/usedRange`,
+      `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/items/${ITEM_ID}/workbook/worksheets('RAC')/usedRange`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     if (!resp.ok) return;
@@ -601,7 +603,7 @@ async function guardarEnOneDrive(rac) {
       rac.fechaCierre, rac.estado, rac.observador, rac.fotoUrl || ''
     ]];
     const resp = await fetch(
-      `https://graph.microsoft.com/v1.0/me/drive/root:/${ARCHIVO_EXCEL}:/workbook/worksheets('RAC')/tables('TablaRAC')/rows`,
+      `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/items/${ITEM_ID}/workbook/worksheets('RAC')/tables('TablaRAC')/rows`,
       {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -623,7 +625,7 @@ async function guardarFotoOneDrive(racId) {
   try {
     const blob = await fetch(fotoBase64).then(r => r.blob());
     await fetch(
-      `https://graph.microsoft.com/v1.0/me/drive/root:/${CARPETA_FOTOS}/RAC_${racId}.jpg:/content`,
+      `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root:/${CARPETA_FOTOS}/RAC_${racId}.jpg:/content`,
       { method: 'PUT', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'image/jpeg' }, body: blob }
     );
   } catch (e) { console.warn('No se pudo guardar foto:', e); }
