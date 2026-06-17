@@ -470,9 +470,9 @@
 // Pasos: portal.azure.com > App registrations > New registration
 // Redirect URI: la URL donde despliegues esta app (ej: https://tudominio.com)
 const MSAL_CONFIG = {
-  clientId: 'TU_CLIENT_ID_AQUI',
+  clientId: '7a7b5699-a668-4f93-838c-8b5734409c63',
   authority: 'https://login.microsoftonline.com/common',
-  redirectUri: window.location.origin + window.location.pathname
+  redirectUri: 'https://andersonalfaro94.github.io/RAC-Cumbres-Doradas/'
 };
 
 const SCOPES = ['Files.ReadWrite', 'User.Read'];
@@ -493,7 +493,7 @@ let filtroActivo = 'todos';
 // ═══════════════════════════════════════════════════════
 // AUTENTICACIÓN (MSAL via CDN)
 // ═══════════════════════════════════════════════════════
-function iniciarLogin() {
+function iniciarLogin() { loginMicrosoft(); } function iniciarLogin_old() {
   // En producción, usar MSAL.js real
   // Por ahora simulamos con popup de configuración
   if (MSAL_CONFIG.clientId === 'TU_CLIENT_ID_AQUI') {
