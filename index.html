@@ -496,7 +496,7 @@ let filtroActivo = 'todos';
 function iniciarLogin() { loginMicrosoft(); } function iniciarLogin_old() {
   // En producción, usar MSAL.js real
   // Por ahora simulamos con popup de configuración
-  if (MSAL_CONFIG.clientId === 'TU_CLIENT_ID_AQUI') {
+  if (MSAL_CONFIG.clientId === '7a7b5699-a668-4f93-838c-8b5734409c63') {
     mostrarConfiguracion();
     return;
   }
@@ -514,7 +514,7 @@ function mostrarConfiguracion() {
       <li>Ve a <strong style="color:var(--amarillo)">portal.azure.com</strong></li>
       <li>App registrations → New registration</li>
       <li>Nombre: "RAC Cumbres Doradas"</li>
-      <li>Redirect URI: <code style="color:var(--amarillo);font-size:0.75rem">${window.location.origin + window.location.pathname}</code></li>
+      <li>Redirect URI: <code style="color:var(--amarillo);font-size:0.75rem">${'https://andersonalfaro94.github.io/RAC-Cumbres-Doradas/'}</code></li>
       <li>Copiar el Application (client) ID</li>
       <li>Reemplazar CLIENT_ID en el código</li>
     </ol>
