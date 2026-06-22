@@ -342,8 +342,8 @@
       </div>
 
       <div class="form-grupo">
-        <label class="form-label">Observador</label>
-        <select class="form-select" id="campo-observador">
+        <label class="form-label">Responsable del Cierre</label>
+        <select class="form-select" id="campo-responsable-select">
           <option value="">— Selecciona primero el área —</option>
         </select>
       </div>
@@ -358,10 +358,7 @@
         <textarea class="form-textarea" id="campo-descripcion" placeholder="Describe el acto o condición observada..."></textarea>
       </div>
 
-      <div class="form-grupo">
-        <label class="form-label">Responsable del cierre</label>
-        <input class="form-input" id="campo-responsable" type="text" placeholder="Nombre del responsable">
-      </div>
+
 
       <div class="form-grupo">
         <label class="form-label">Fecha límite de cierre</label>
@@ -694,7 +691,7 @@ function inicializarSelectores() {
 
 function actualizarObservadores() {
   const area = document.getElementById('campo-area').value;
-  const sel = document.getElementById('campo-observador');
+  const sel = document.getElementById('campo-responsable-select');
   sel.innerHTML = '<option value="">— Selecciona observador —</option>';
   if (!area || !PERSONAL_POR_AREA[area]) return;
   PERSONAL_POR_AREA[area].forEach(nombre => {
@@ -736,7 +733,7 @@ async function guardarRAC() {
   const observador = document.getElementById('campo-observador').value.trim();
   const lugar = document.getElementById('campo-lugar').value.trim();
   const descripcion = document.getElementById('campo-descripcion').value.trim();
-  const responsable = document.getElementById('campo-responsable').value.trim();
+  const responsable = document.getElementById('campo-responsable-select').value.trim();
 
   if (!tipoSeleccionado) { mostrarToast('Selecciona el tipo de hallazgo', true); return; }
   if (!riesgoSeleccionado) { mostrarToast('Selecciona el nivel de riesgo', true); return; }
@@ -786,7 +783,7 @@ function limpiarFormulario() {
   ['campo-area', 'campo-lugar', 'campo-descripcion', 'campo-responsable', 'campo-fecha-cierre'].forEach(id => {
     document.getElementById(id).value = '';
   });
-  document.getElementById('campo-observador').innerHTML = '<option value="">— Selecciona primero el área —</option>';
+  document.getElementById('campo-responsable-select').innerHTML = '<option value="">— Selecciona primero el área —</option>';
   document.getElementById('foto-preview').style.display = 'none';
   document.querySelector('.foto-texto').textContent = 'Toca para tomar foto o seleccionar';
 }
