@@ -335,7 +335,21 @@
       </div>
 
       <div class="form-grupo">
-        <label class="form-label">Lugar / Área</label>
+        <label class="form-label">Área</label>
+        <select class="form-select" id="campo-area" onchange="actualizarObservadores()">
+          <option value="">— Selecciona el área —</option>
+        </select>
+      </div>
+
+      <div class="form-grupo">
+        <label class="form-label">Observador</label>
+        <select class="form-select" id="campo-observador">
+          <option value="">— Selecciona primero el área —</option>
+        </select>
+      </div>
+
+      <div class="form-grupo">
+        <label class="form-label">Lugar / Sector</label>
         <input class="form-input" id="campo-lugar" type="text" placeholder="Ej: Galería 4, Nivel 2800" autocomplete="off">
       </div>
 
@@ -481,6 +495,10 @@ const ARCHIVO_EXCEL = 'Proyecto Cumbres Doradas/5. SIG SSOMA/RAC_CumbresDoradas.
 const DRIVE_ID = '6AFF701E92BD31D4';
 const ITEM_ID = 'DE55A54F-46FA-49A9-AF76-FE46648006D8';
 const CARPETA_FOTOS = 'RAC_Fotos';
+const ARCHIVO_SUPERVISION = 'Proyecto Cumbres Doradas/5. SIG SSOMA/Data_Supervisión.xlsx';
+
+// Personal por área — se actualiza dinámicamente desde OneDrive
+let PERSONAL_POR_AREA = {"MINA": ["CASTILLO CONTRERAS ANDY WILLIAMS", "LOPEZ VEGA JORGE LUIS", "NAVARRO TORREJON JULIO CESAR", "ALFARO GAMBOA ANDERSON JONATHAN", "LUCHO BUSTAMANTE MENDOCILLA EDGAR"], "GEOLOGIA": ["QUISPE ORE STALYN DARWIN", "CALSIN ACUÑA ROGER", "HILARIO CABELLO IVETTE ZELLE", "ROJAS OROZCO VICTOR MANUEL", "GARCIA AGUILAR WILMER"], "SEGURIDAD Y SALUD OCUPACIONAL": ["PONCE SUAREZ PABLO", "JARAMILLO RIVAS EDUARDO MARÍN", "DUQUE ARAMBULO MARTIN EMANUEL", "ROMAN RUIZ LEYLA ZADITH"], "MANTENIMIENTO": ["ESCOBEDO FREDDY"], "LOGISTICA": ["LAREDO ALEJANDRO", "CAJO LLANOS REYNER", "URCIA ARENAS ETHAN DANGELO"], "RECURSOS HUMANOS": ["GONZALES ALQUIZAR GERALDINE AZUCENA"], "RESPONSABILIDAD SOCIAL EMPRESARIAL": ["PINEDA VILLALVA ELVIS JORGE", "TRAVEZAÑO HERMITAÑO DIANA KARINA"], "PROYECTOS": ["OLIVERA PEREZ JOSE"]};
 
 // ═══════════════════════════════════════════════════════
 // ESTADO DE LA APP
@@ -538,6 +556,7 @@ function procesarTokenDeURL() {
   obtenerUsuario().then(() => {
     activarApp();
     cargarRACsDesdeOneDrive();
+  cargarPersonalDesdeOneDrive();
   });
   return true;
 }
@@ -635,6 +654,57 @@ async function guardarFotoOneDrive(racId) {
 // ═══════════════════════════════════════════════════════
 // FORMULARIO
 // ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// PERSONAL DESDE ONEDRIVE
+// ═══════════════════════════════════════════════════════
+async function cargarPersonalDesdeOneDrive() {
+  if (token === 'DEMO') { inicializarSelectores(); return; }
+  try {
+    const resp = await fetch(
+      `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root:/${ARCHIVO_SUPERVISION}:/workbook/worksheets('Supervision')/usedRange`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!resp.ok) { inicializarSelectores(); return; }
+    const data = await resp.json();
+    const filas = data.values.slice(1); // saltar encabezado
+    const nuevo = {};
+    filas.forEach(f => {
+      const nombre = (f[0] || '').trim();
+      const area = (f[1] || '').trim();
+      if (!nombre || !area) return;
+      if (!nuevo[area]) nuevo[area] = [];
+      nuevo[area].push(nombre);
+    });
+    if (Object.keys(nuevo).length > 0) PERSONAL_POR_AREA = nuevo;
+  } catch(e) { console.warn('No se pudo cargar personal:', e); }
+  inicializarSelectores();
+}
+
+function inicializarSelectores() {
+  const sel = document.getElementById('campo-area');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Selecciona el área —</option>';
+  Object.keys(PERSONAL_POR_AREA).sort().forEach(area => {
+    const opt = document.createElement('option');
+    opt.value = area;
+    opt.textContent = area;
+    sel.appendChild(opt);
+  });
+}
+
+function actualizarObservadores() {
+  const area = document.getElementById('campo-area').value;
+  const sel = document.getElementById('campo-observador');
+  sel.innerHTML = '<option value="">— Selecciona observador —</option>';
+  if (!area || !PERSONAL_POR_AREA[area]) return;
+  PERSONAL_POR_AREA[area].forEach(nombre => {
+    const opt = document.createElement('option');
+    opt.value = nombre;
+    opt.textContent = nombre;
+    sel.appendChild(opt);
+  });
+}
+
 function seleccionarTipo(tipo) {
   tipoSeleccionado = tipo;
   document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('seleccionado', 'acto', 'condicion'));
@@ -662,13 +732,17 @@ function previewFoto(e) {
 }
 
 async function guardarRAC() {
+  const area = document.getElementById('campo-area').value.trim();
+  const observador = document.getElementById('campo-observador').value.trim();
   const lugar = document.getElementById('campo-lugar').value.trim();
   const descripcion = document.getElementById('campo-descripcion').value.trim();
   const responsable = document.getElementById('campo-responsable').value.trim();
 
   if (!tipoSeleccionado) { mostrarToast('Selecciona el tipo de hallazgo', true); return; }
   if (!riesgoSeleccionado) { mostrarToast('Selecciona el nivel de riesgo', true); return; }
-  if (!lugar) { mostrarToast('Ingresa el lugar del hallazgo', true); return; }
+  if (!area) { mostrarToast('Selecciona el área', true); return; }
+  if (!observador) { mostrarToast('Selecciona el observador', true); return; }
+  if (!lugar) { mostrarToast('Ingresa el lugar / sector', true); return; }
   if (!descripcion) { mostrarToast('Ingresa la descripción del hallazgo', true); return; }
 
   const btn = document.getElementById('btn-guardar');
@@ -686,7 +760,8 @@ async function guardarRAC() {
     responsable: responsable || 'Sin asignar',
     fechaCierre: document.getElementById('campo-fecha-cierre').value,
     estado: 'abierto',
-    observador: usuario.displayName || usuario.mail,
+    area: area,
+    observador: observador,
     fotoUrl: fotoBase64 ? `${CARPETA_FOTOS}/RAC_${Date.now()}.jpg` : ''
   };
 
@@ -708,9 +783,10 @@ function limpiarFormulario() {
   document.querySelectorAll('.tipo-btn, .riesgo-btn').forEach(b =>
     b.classList.remove('seleccionado', 'acto', 'condicion', 'alto', 'medio', 'bajo')
   );
-  ['campo-lugar', 'campo-descripcion', 'campo-responsable', 'campo-fecha-cierre'].forEach(id => {
+  ['campo-area', 'campo-lugar', 'campo-descripcion', 'campo-responsable', 'campo-fecha-cierre'].forEach(id => {
     document.getElementById(id).value = '';
   });
+  document.getElementById('campo-observador').innerHTML = '<option value="">— Selecciona primero el área —</option>';
   document.getElementById('foto-preview').style.display = 'none';
   document.querySelector('.foto-texto').textContent = 'Toca para tomar foto o seleccionar';
 }
