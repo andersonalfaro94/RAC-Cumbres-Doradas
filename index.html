@@ -730,7 +730,7 @@ function previewFoto(e) {
 
 async function guardarRAC() {
   const area = document.getElementById('campo-area').value.trim();
-  const observador = document.getElementById('campo-observador').value.trim();
+  const observador = usuario.displayName || usuario.mail || 'Usuario';
   const lugar = document.getElementById('campo-lugar').value.trim();
   const descripcion = document.getElementById('campo-descripcion').value.trim();
   const responsable = document.getElementById('campo-responsable-select').value.trim();
@@ -738,7 +738,7 @@ async function guardarRAC() {
   if (!tipoSeleccionado) { mostrarToast('Selecciona el tipo de hallazgo', true); return; }
   if (!riesgoSeleccionado) { mostrarToast('Selecciona el nivel de riesgo', true); return; }
   if (!area) { mostrarToast('Selecciona el área', true); return; }
-  if (!observador) { mostrarToast('Selecciona el observador', true); return; }
+
   if (!lugar) { mostrarToast('Ingresa el lugar / sector', true); return; }
   if (!descripcion) { mostrarToast('Ingresa la descripción del hallazgo', true); return; }
 
